@@ -5,37 +5,41 @@ use std::borrow::Borrow;
 #[derive(Debug)]
 enum IntList<'a> {
     Empty,
-    Cons(i32, Cowish<'a, IntList<'a>>),
+    Cons(i32, Cowish<'a, IntList<'a>, Box<IntList<'a>>>),
 }
 
 #[derive(Debug)]
-enum Cowish<'a, T>
-where
-    T: 'a,
+enum Cowish<'a, T, B>
+where T: 'a,
 {
     Borrowed(&'a T),
-    Owned(Box<T>),
+    Owned(B),
 }
 
-impl<'a, T> Borrow<T> for Cowish<'a, T> where T: 'a {
-     fn borrow(&self) -> &T {
-         match self {
-             &Cowish::Borrowed(b) => b,
-             &Cowish::Owned(ref o) => o.borrow(),
-         }
-     }
+impl<'a, T, B> Borrow<T> for Cowish<'a, T, B>
+where
+    T: 'a,
+    B: Borrow<T>,
+{
+    fn borrow(&self) -> &T {
+        match self {
+            &Cowish::Borrowed(b) => b,
+            &Cowish::Owned(ref o) => o.borrow(),
+        }
+    }
 }
 
-impl<'a, T> Cowish<'a, T> where T: Clone + 'a {
-     fn into_owned(self) -> Box<T> {
-         match self {
-            Cowish::Borrowed(b) => Box::new(b.clone()),
+impl<'a, T, B> Cowish<'a, T, B>
+where
+    T: Into<B> + Clone + 'a,
+{
+    fn into_owned(self) -> B {
+        match self {
+            Cowish::Borrowed(b) => b.clone().into(),
             Cowish::Owned(o) => o,
-         }
-     }
+        }
+    }
 }
-
-use IntList::*;
 
 fn main() {
     // let x = Cons(1, &Cons(2, &Cons(3, &Empty)));
