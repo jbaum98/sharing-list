@@ -1,18 +1,18 @@
 use std::borrow::Borrow;
 
 #[derive(Debug)]
-pub enum Cowish<'a, T, B>
+pub enum Cowish<'a, T, O>
 where
     T: 'a,
 {
     Borrowed(&'a T),
-    Owned(B),
+    Owned(O),
 }
 
-impl<'a, T, B> Borrow<T> for Cowish<'a, T, B>
+impl<'a, T, O> Borrow<T> for Cowish<'a, T, O>
 where
     T: 'a,
-    B: Borrow<T>,
+    O: Borrow<T>,
 {
     fn borrow(&self) -> &T {
         match self {
@@ -22,11 +22,11 @@ where
     }
 }
 
-impl<'a, T, B> Cowish<'a, T, B>
+impl<'a, T, O> Cowish<'a, T, O>
 where
-    T: Into<B> + Clone + 'a,
+    T: Into<O> + Clone + 'a,
 {
-    pub fn into_owned(self) -> B {
+    pub fn into_owned(self) -> O {
         match self {
             Cowish::Borrowed(b) => b.clone().into(),
             Cowish::Owned(o) => o,
