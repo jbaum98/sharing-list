@@ -1,47 +1,19 @@
 #![allow(dead_code)]
 
-use std::borrow::Borrow;
+use std::iter::Iterator;
 
-#[derive(Debug)]
-enum IntList<'a> {
-    Empty,
-    Cons(i32, Cowish<'a, IntList<'a>, Box<IntList<'a>>>),
-}
+mod cowish;
+mod list;
 
-#[derive(Debug)]
-enum Cowish<'a, T, B>
-where T: 'a,
-{
-    Borrowed(&'a T),
-    Owned(B),
-}
 
-impl<'a, T, B> Borrow<T> for Cowish<'a, T, B>
-where
-    T: 'a,
-    B: Borrow<T>,
-{
-    fn borrow(&self) -> &T {
-        match self {
-            Cowish::Borrowed(b) => b,
-            Cowish::Owned(o) => o.borrow(),
-        }
-    }
-}
-
-impl<'a, T, B> Cowish<'a, T, B>
-where
-    T: Into<B> + Clone + 'a,
-{
-    fn into_owned(self) -> B {
-        match self {
-            Cowish::Borrowed(b) => b.clone().into(),
-            Cowish::Owned(o) => o,
-        }
-    }
-}
+use list::List;
 
 fn main() {
-    // let x = Cons(1, &Cons(2, &Cons(3, &Empty)));
-    // println!("{:?}", x)
+    let tl = (1..10).collect::<List<i32>>();
+    // We move the tail, so l1 owns it
+    let l1 = tl.owned_cons(0);
+    // We reference the tail so we can still use it without moving
+    let l2 = l1.tail().cons(-1);
+    println!("{:?}", l1);
+    println!("{:?}", l2);
 }
