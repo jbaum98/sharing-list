@@ -1,4 +1,6 @@
-use std::borrow::Borrow;
+use std::borrow::{Borrow, ToOwned};
+
+use self::Cowish::*;
 
 #[derive(Debug)]
 pub enum Cowish<'a, T, O>
@@ -16,20 +18,21 @@ where
 {
     fn borrow(&self) -> &T {
         match self {
-            Cowish::Borrowed(b) => b,
-            Cowish::Owned(o) => o.borrow(),
+            Borrowed(b) => b,
+            Owned(o) => o.borrow(),
         }
     }
 }
 
 impl<'a, T, O> Cowish<'a, T, O>
 where
-    T: Into<O> + Clone + 'a,
+    T: ToOwned<Owned=O> + 'a,
+    O: Borrow<T>,
 {
     pub fn into_owned(self) -> O {
         match self {
-            Cowish::Borrowed(b) => b.clone().into(),
-            Cowish::Owned(o) => o,
+            Borrowed(b) => b.to_owned(),
+            Owned(o) => o,
         }
     }
 }
