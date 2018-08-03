@@ -23,8 +23,8 @@ where
 {
     fn borrow(&self) -> &T {
         match self {
-            &Cowish::Borrowed(b) => b,
-            &Cowish::Owned(ref o) => o.borrow(),
+            Cowish::Borrowed(b) => b,
+            Cowish::Owned(o) => o.borrow(),
         }
     }
 }
