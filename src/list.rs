@@ -21,11 +21,11 @@ impl<'a, T> List<'a, T> {
     }
 
     pub fn owned_cons(self, el: T) -> List<'a, T> {
-        return List::Cons(el, Cowish::Owned(Box::new(self)));
+        List::Cons(el, Cowish::Owned(Box::new(self)))
     }
 
     pub fn cons(&'a self, el: T) -> List<'a, T> {
-        return List::Cons(el, Cowish::Borrowed(self));
+        List::Cons(el, Cowish::Borrowed(self))
     }
 }
 
@@ -38,6 +38,6 @@ impl<'a, T> FromIterator<T> for List<'a, T> {
         for x in iter {
             l = l.owned_cons(x);
         }
-        return l
+        l
     }
 }
