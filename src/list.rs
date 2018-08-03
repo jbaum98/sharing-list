@@ -15,8 +15,8 @@ where
 impl<'a, T> List<'a, T> {
     pub fn tail(&self) -> &List<'a, T> {
         match self {
-            &List::Empty => &List::Empty,
-            &List::Cons(_, ref tl) => tl.borrow(),
+            List::Empty => &List::Empty,
+            List::Cons(_, tl) => tl.borrow(),
         }
     }
 
